@@ -10,6 +10,7 @@ import 'dart:developer' as developer;
 import 'package:sortcutnepal/screens/message/no_internet_screen.dart';
 import 'package:sortcutnepal/screens/message/unable_load_screen.dart';
 import 'package:sortcutnepal/utils/constants.dart';
+import 'package:sortcutnepal/widgets/alerts.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({Key? key}) : super(key: key);
@@ -103,111 +104,140 @@ class _WishlistScreenState extends State<WishlistScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () => exitApp(context, webViewController!),
-      child: Scaffold(
-        body: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: const SystemUiOverlayStyle(
-            statusBarColor: Color(0xff486CCE), // Color of you choice
-            statusBarIconBrightness: Brightness.light,
-            statusBarBrightness: Brightness.light,
-          ),
-          child: SafeArea(
-            child: Stack(
-              children: [
-                isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                        color: Color(0xff486CCE),
-                      ))
-                    : const SizedBox(),
-                Container(
-                  child: isLoading == false &&
-                          _connectionStatus == ConnectivityResult.none
-                      ? const NoInternetScreen()
-                      : Stack(
-                          children: <Widget>[
-                            if (!showErrorPage)
-                              InAppWebView(
-                                shouldOverrideUrlLoading:
-                                    (controller, navigationAction) async {
-                                  final uri = navigationAction.request.url!;
-                                  if (uri.toString() != AppConstants.homeUrl) {
-                                    return NavigationActionPolicy.ALLOW;
-                                  }
-                                  return NavigationActionPolicy.CANCEL;
-                                },
-                                key: webViewKey,
-                                initialOptions: InAppWebViewGroupOptions(
-                                  crossPlatform: InAppWebViewOptions(
-                                    javaScriptCanOpenWindowsAutomatically: true,
-                                    useShouldOverrideUrlLoading: true,
-                                    mediaPlaybackRequiresUserGesture: true,
-                                    useOnDownloadStart: true,
-                                    allowFileAccessFromFileURLs: true,
-                                    useOnLoadResource: true,
-                                    supportZoom: false,
-                                    userAgent: 'random',
-                                    // incognito: true,
-                                  ),
-                                  android: AndroidInAppWebViewOptions(
-                                    // on Android you need to set supportMultipleWindows to true,
-                                    // otherwise the onCreateWindow event won't be called
-                                    supportMultipleWindows: true,
-                                    useHybridComposition: true,
-                                    useShouldInterceptRequest: true,
-                                    useOnRenderProcessGone: true,
-                                    mixedContentMode: AndroidMixedContentMode
-                                        .MIXED_CONTENT_ALWAYS_ALLOW,
-                                    builtInZoomControls: false,
-                                    allowFileAccess: true,
-                                  ),
-                                ),
-                                pullToRefreshController:
-                                    pullToRefreshController,
-                                onReceivedServerTrustAuthRequest:
-                                    (controller, challenge) async {
-                                  return ServerTrustAuthResponse(
-                                      action: ServerTrustAuthResponseAction
-                                          .PROCEED);
-                                },
-                                onLoadStop: (controller, url) {
-                                  setState(() {
-                                    isLoading = false;
-                                  });
-                                },
-                                initialUrlRequest: URLRequest(
-                                  url: Uri.parse(AppConstants.wishlistUrl),
-                                ),
-                                androidOnPermissionRequest:
-                                    (InAppWebViewController controller,
-                                        String origin,
-                                        List<String> resources) async {
-                                  return PermissionRequestResponse(
-                                    resources: resources,
-                                    action:
-                                        PermissionRequestResponseAction.GRANT,
-                                  );
-                                },
-                                onWebViewCreated:
-                                    (InAppWebViewController controller) {
-                                  webViewController = controller;
-                                },
-                                onLoadError:
-                                    (webViewController, url, i, s) async {
-                                  showError();
-                                },
-                                onLoadHttpError: (webViewController, url, int i,
-                                    String s) async {
-                                  // showError();
-                                },
+      onWillPop: () => Alerts().exitApp(context, webViewController!),
+      child: SafeArea(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                    color: Color(0xff486CCE),
+                  ))
+                : const SizedBox(),
+            Container(
+              child: isLoading == false &&
+                      _connectionStatus == ConnectivityResult.none
+                  ? const NoInternetScreen()
+                  : Stack(
+                      children: <Widget>[
+                        if (!showErrorPage)
+                          InAppWebView(
+                            shouldOverrideUrlLoading:
+                                (controller, navigationAction) async {
+                              final uri = navigationAction.request.url!;
+                              if (uri.toString() != AppConstants.homeUrl) {
+                                return NavigationActionPolicy.ALLOW;
+                              }
+                              // setState(() {});
+                              Navigator.of(context)
+                                  .pushReplacementNamed('/main-bottom-nav');
+                              return NavigationActionPolicy.CANCEL;
+                            },
+                            key: webViewKey,
+                            // androidOnFormResubmission: (controller, url) {
+
+                            // },
+                            androidOnPermissionRequest:
+                                (InAppWebViewController controller,
+                                    String origin,
+                                    List<String> resources) async {
+                              return PermissionRequestResponse(
+                                resources: resources,
+                                action: PermissionRequestResponseAction.GRANT,
+                              );
+                            },
+
+                            initialOptions: InAppWebViewGroupOptions(
+                              crossPlatform: InAppWebViewOptions(
+                                javaScriptCanOpenWindowsAutomatically: true,
+                                useShouldOverrideUrlLoading: true,
+                                mediaPlaybackRequiresUserGesture: true,
+                                useOnDownloadStart: true,
+                                allowFileAccessFromFileURLs: true,
+                                useOnLoadResource: true,
+                                supportZoom: false,
+                                userAgent: 'random',
+                                // incognito: true,
                               ),
-                            if (showErrorPage) const UnableToLoadScreen()
-                          ],
-                        ),
-                ),
-              ],
+                              android: AndroidInAppWebViewOptions(
+                                // on Android you need to set supportMultipleWindows to true,
+                                // otherwise the onCreateWindow event won't be called
+                                supportMultipleWindows: true,
+                                useHybridComposition: true,
+                                useShouldInterceptRequest: true,
+                                useOnRenderProcessGone: true,
+                                mixedContentMode: AndroidMixedContentMode
+                                    .MIXED_CONTENT_ALWAYS_ALLOW,
+                                builtInZoomControls: false,
+                                allowFileAccess: true,
+                                domStorageEnabled: true,
+                                databaseEnabled: true,
+                              ),
+                            ),
+                            pullToRefreshController: pullToRefreshController,
+                            onReceivedServerTrustAuthRequest:
+                                (controller, challenge) async {
+                              return ServerTrustAuthResponse(
+                                  action:
+                                      ServerTrustAuthResponseAction.PROCEED);
+                            },
+                            onLoadStop: (controller, url) {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              String footerHome = ''' 
+                                  document.getElementsByClassName('footer-part')[0].style.display = 'none';
+                                    
+                                  ''';
+                              String footerRental =
+                                  " document.getElementById('footer').style.display = 'none';";
+                              String mobileNav =
+                                  " document.getElementsByClassName('mobile-nav')[0].style.display = 'none';";
+                              // alert('JS Running')
+                              controller
+                                  .evaluateJavascript(source: footerHome)
+                                  .then((result) {});
+                              controller
+                                  .evaluateJavascript(source: footerRental)
+                                  .then((result) {});
+                              controller
+                                  .evaluateJavascript(source: mobileNav)
+                                  .then((result) {
+                                print(result);
+                                debugPrint(result);
+                              });
+                            },
+                            initialUrlRequest: URLRequest(
+                              url: Uri.parse(AppConstants.wishlistUrl),
+                            ),
+                            // androidOnPermissionRequest:
+                            //     (InAppWebViewController controller,
+                            //         String origin,
+                            //         List<String> resources) async {
+                            //   return PermissionRequestResponse(
+                            //     resources: resources,
+                            //     action:
+                            //         PermissionRequestResponseAction.GRANT,
+                            //   );
+                            // },
+                            onWebViewCreated:
+                                (InAppWebViewController controller) {
+                              webViewController = controller;
+                            },
+                            onLoadError: (webViewController, url, i, s) async {
+                              showError();
+                            },
+                            onLoadHttpError: (webViewController, url, int i,
+                                String s) async {
+                              // showError();
+                            },
+                          ),
+                        if (showErrorPage) const UnableToLoadScreen()
+                      ],
+                    ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -223,49 +253,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
     setState(() {
       showErrorPage = false;
     });
-  }
-
-  exitApp(
-      BuildContext context, InAppWebViewController webViewController) async {
-    if (await webViewController.canGoBack()) {
-      // print("onwill goback");
-      webViewController.goBack();
-    } else {
-      // Scaffold.of(context).showSnackBar(
-      //   const SnackBar(content: Text("No back history item")),
-      // );
-      showDialog(
-          // barrierColor: Color(0xff5C75AA),
-          context: context,
-          builder: (context) => AlertDialog(
-                backgroundColor: Color(0xff5C75AA),
-                title: Text(
-                  'Do you want to exit?',
-                  style: TextStyle(color: Colors.white60, fontSize: 16),
-                ),
-                actions: <Widget>[
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      'No',
-                      style: TextStyle(color: Colors.black54, fontSize: 12),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      SystemNavigator.pop();
-                    },
-                    child: Text(
-                      'Yes',
-                      style: TextStyle(color: Colors.black54, fontSize: 12),
-                    ),
-                  ),
-                ],
-              ));
-      return Future.value(false);
-    }
   }
 }
 
