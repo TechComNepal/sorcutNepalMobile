@@ -1,11 +1,17 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sortcutnepal/screens/add_post_screen.dart';
 import 'package:sortcutnepal/screens/category_screen.dart';
 import 'package:sortcutnepal/screens/home_screen.dart';
+import 'package:sortcutnepal/screens/message/no_internet_screen.dart';
 import 'package:sortcutnepal/screens/profile_screen.dart';
 import 'package:sortcutnepal/screens/wishlist_screen.dart';
+import 'package:sortcutnepal/utils/colors.dart';
 import 'package:sortcutnepal/utils/exporter.dart';
+import 'dart:developer' as developer;
 
 class MainBottomNavScreen extends StatefulWidget {
   const MainBottomNavScreen({super.key});
@@ -15,12 +21,12 @@ class MainBottomNavScreen extends StatefulWidget {
 }
 
 class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
-  static const mainColor = Color(0xff5C75AA);
-  static const whiteColor = Color(0xfffcfcfc);
-  static const blackColor = Color(0xff0c0c0c);
-
   int currentTab = 0;
   var _scrollController = ScrollController();
+
+  ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
   bool visibility = false;
   // WebviewScreen(url: AppConstants.wishlistUrl),
@@ -37,10 +43,47 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
   @override
   void initState() {
     super.initState();
-//scrollListener(1)
+    initConnectivity();
+
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+
     _scrollController.addListener(() {
       print("scrollListener / pixel =>${_scrollController.position.pixels}");
     });
+  }
+
+// Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initConnectivity() async {
+    late ConnectivityResult result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      developer.log('Couldn\'t check connectivity status', error: e);
+      return;
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) {
+      return Future.value(null);
+    }
+
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -54,43 +97,48 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
             statusBarIconBrightness: Brightness.dark,
             statusBarBrightness: Brightness.dark,
           ),
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (scrollNotification) {
-              if (scrollNotification is ScrollStartNotification) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  print(
-                      "ScrollStartNotification / pixel => ${scrollNotification.metrics.pixels}");
-                  if (scrollNotification.metrics.pixels > 200) {
-                    visibility = true;
-                  }
-                });
-              } else if (scrollNotification is ScrollEndNotification) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  setState(() {
-                    print(
-                        "ScrollEndNotification / pixel =>${scrollNotification.metrics.pixels}");
-                  });
-                  if (scrollNotification.metrics.pixels == 0) {
-                    visibility = true;
-                  } else {
-                    visibility = false;
-                  }
-                });
-              }
+          child: _connectionStatus == ConnectivityResult.none
+              ? const NoInternetScreen()
+              : NotificationListener<ScrollNotification>(
+                  onNotification: (scrollNotification) {
+                    if (scrollNotification is ScrollStartNotification) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        print(
+                            "ScrollStartNotification / pixel => ${scrollNotification.metrics.pixels}");
+                        if (scrollNotification.metrics.pixels == 0) {
+                          visibility = true;
+                        } else if (scrollNotification.metrics.pixels > 200) {
+                          visibility = true;
+                        }
+                      });
+                    } else if (scrollNotification is ScrollEndNotification) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        setState(() {
+                          print(
+                              "ScrollEndNotification / pixel =>${scrollNotification.metrics.pixels}");
+                        });
+                        if (scrollNotification.metrics.pixels == 0) {
+                          visibility = true;
+                        } else {
+                          visibility = false;
+                        }
+                      });
+                    }
 
-              return true;
-            },
-            child: ListView(
-              physics: ClampingScrollPhysics(),
-              controller: _scrollController,
-              children: [
-                ConstrainedBox(
-                    constraints: BoxConstraints(
-                        maxHeight: MediaQuery.of(context).size.height * 10),
-                    child: screens[currentTab]),
-              ],
-            ),
-          )),
+                    return true;
+                  },
+                  child: ListView(
+                    physics: const ClampingScrollPhysics(),
+                    controller: _scrollController,
+                    children: [
+                      ConstrainedBox(
+                          constraints: BoxConstraints(
+                              maxHeight:
+                                  MediaQuery.of(context).size.height * 10),
+                          child: screens[currentTab]),
+                    ],
+                  ),
+                )),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Visibility(
         visible: visibility,
@@ -104,7 +152,7 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
           shape: const CircleBorder(),
           child: const Icon(
             Icons.add,
-            color: whiteColor,
+            color: AppColors.whiteColor,
           ),
         ),
       ),
@@ -113,7 +161,7 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
         child: Theme(
           data: Theme.of(context).copyWith(canvasColor: Colors.transparent),
           child: BottomAppBar(
-            color: mainColor,
+            color: AppColors.mainColor,
             shape: const CircularNotchedRectangle(),
             notchMargin: 5,
             clipBehavior: Clip.antiAlias,
@@ -125,7 +173,7 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                   : MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Material(
-                  color: mainColor,
+                  color: AppColors.mainColor,
                   child: Center(
                     child: GestureDetector(
                       onTap: () {
@@ -139,11 +187,11 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                               children: [
                                 Icon(
                                   Icons.home,
-                                  color: whiteColor,
+                                  color: AppColors.whiteColor,
                                 ),
                                 Text(
                                   "Home",
-                                  style: TextStyle(color: whiteColor),
+                                  style: TextStyle(color: AppColors.whiteColor),
                                 ),
                                 //const Padding(padding: EdgeInsets.all(10))
                               ],
@@ -153,11 +201,11 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                               children: [
                                 Icon(
                                   Icons.home,
-                                  color: blackColor,
+                                  color: AppColors.blackColor,
                                 ),
                                 Text(
                                   "Home",
-                                  style: TextStyle(color: blackColor),
+                                  style: TextStyle(color: AppColors.blackColor),
                                 ),
                                 //const Padding(padding: EdgeInsets.all(10))
                               ],
@@ -166,7 +214,7 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                   ),
                 ),
                 Material(
-                  color: mainColor,
+                  color: AppColors.mainColor,
                   child: Center(
                     child: GestureDetector(
                       onTap: () {
@@ -180,11 +228,11 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                               children: [
                                 Icon(
                                   Icons.group,
-                                  color: whiteColor,
+                                  color: AppColors.whiteColor,
                                 ),
                                 Text(
                                   "Category",
-                                  style: TextStyle(color: whiteColor),
+                                  style: TextStyle(color: AppColors.whiteColor),
                                 ),
                                 //const Padding(padding: EdgeInsets.all(10))
                               ],
@@ -194,11 +242,11 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                               children: [
                                 Icon(
                                   Icons.group,
-                                  color: blackColor,
+                                  color: AppColors.blackColor,
                                 ),
                                 Text(
                                   "Category",
-                                  style: TextStyle(color: blackColor),
+                                  style: TextStyle(color: AppColors.blackColor),
                                 ),
                                 //const Padding(padding: EdgeInsets.all(10))
                               ],
@@ -208,7 +256,7 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                 ),
                 const SizedBox(), //to make space for the floating button
                 Material(
-                  color: mainColor,
+                  color: AppColors.mainColor,
                   child: Center(
                     child: GestureDetector(
                       onTap: () {
@@ -222,11 +270,11 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                               children: [
                                 Icon(
                                   Icons.favorite,
-                                  color: whiteColor,
+                                  color: AppColors.whiteColor,
                                 ),
                                 Text(
                                   "Wishlist",
-                                  style: TextStyle(color: whiteColor),
+                                  style: TextStyle(color: AppColors.whiteColor),
                                 ),
                                 //const Padding(padding: EdgeInsets.all(10))
                               ],
@@ -236,11 +284,11 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                               children: [
                                 Icon(
                                   Icons.favorite,
-                                  color: blackColor,
+                                  color: AppColors.blackColor,
                                 ),
                                 Text(
                                   "Wishlist",
-                                  style: TextStyle(color: blackColor),
+                                  style: TextStyle(color: AppColors.blackColor),
                                 ),
                                 //const Padding(padding: EdgeInsets.all(10))
                               ],
@@ -249,7 +297,7 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                   ),
                 ),
                 Material(
-                  color: mainColor,
+                  color: AppColors.mainColor,
                   child: Center(
                     child: GestureDetector(
                       onTap: () {
@@ -263,11 +311,11 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                               children: [
                                 Icon(
                                   Icons.person,
-                                  color: whiteColor,
+                                  color: AppColors.whiteColor,
                                 ),
                                 Text(
                                   "Profile",
-                                  style: TextStyle(color: whiteColor),
+                                  style: TextStyle(color: AppColors.whiteColor),
                                 ),
                                 //const Padding(padding: EdgeInsets.all(10))
                               ],
@@ -277,11 +325,11 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                               children: [
                                 Icon(
                                   Icons.person,
-                                  color: blackColor,
+                                  color: AppColors.blackColor,
                                 ),
                                 Text(
                                   "Profile",
-                                  style: TextStyle(color: blackColor),
+                                  style: TextStyle(color: AppColors.blackColor),
                                 ),
                                 //const Padding(padding: EdgeInsets.all(10))
                               ],

@@ -9,6 +9,7 @@ class UnableToLoadScreen extends StatelessWidget {
       body: Container(
         color: Colors.white54,
         width: double.infinity,
+        height: MediaQuery.of(context).size.height,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
