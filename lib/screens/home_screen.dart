@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                             onLoadStop: (controller, url) {
                               setState(() {
-                                isLoading = false;
+                                isLoading = true;
                               });
                               String footerHome = ''' 
                                   document.getElementsByClassName('footer-part')[0].style.display = 'none';
@@ -179,6 +179,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   .then((result) {
                                 print(result);
                                 debugPrint(result);
+                              });
+                              setState(() {
+                                isLoading = false;
                               });
                             },
                             initialUrlRequest: URLRequest(

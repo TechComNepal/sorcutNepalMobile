@@ -89,7 +89,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           child: Column(
                             children: [
                               Image.asset(
-                                "assets/sortcut-logo.png",
+                                "assets/sortcut.png",
                                 height: SizeConfig.blockV! * 8,
                                 // 6
                               ),
