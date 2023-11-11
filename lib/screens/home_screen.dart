@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -32,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final ChromeSafariBrowser browser = new AndroidTWABrowser();
   NavBarController navBarController = Get.put(NavBarController());
   int scrollY = 0;
+
   @override
   void initState() {
     super.initState();
@@ -123,6 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         setState(() {
                           isLoading = false;
                         });
+                        navBarController.updateIsLoading(false);
                       },
                       initialUrlRequest: URLRequest(
                         url: Uri.parse(AppConstants.homeUrl),
@@ -154,10 +158,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         setState(() {
                           scrollY = y;
                         });
-                        print('Scrollhome $scrollY');
-                        navBarController.scrollY.value = y;
-                        navBarController.update();
-                        print('Scrollhome1 ${navBarController.scrollY.value}');
+                        // print('Scrollhome $scrollY');
+                        navBarController.updateScrollY(y);
+                        // print('Scrollhome1 ${navBarController.scrollY.value}');
+                      },
+                      // gestureRecognizers: Set()
+                      //   ..add(Factory<VerticalDragGestureRecognizer>(
+                      //       () => VerticalDragGestureRecognizer())),
+                      gestureRecognizers: <Factory<
+                          OneSequenceGestureRecognizer>>{
+                        Factory<OneSequenceGestureRecognizer>(
+                          () => EagerGestureRecognizer(),
+                        ),
                       },
                       onLoadHttpError:
                           (webViewController, url, int i, String s) async {

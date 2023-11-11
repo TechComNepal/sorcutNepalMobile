@@ -5,6 +5,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:get/get.dart';
+import 'package:sortcutnepal/controllers/navbarController.dart';
 import 'package:sortcutnepal/screens/message/loading_screen.dart';
 import 'dart:developer' as developer;
 
@@ -28,6 +30,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
   late PullToRefreshController pullToRefreshController;
 
   final ChromeSafariBrowser browser = new AndroidTWABrowser();
+
+  NavBarController navBarController = Get.put(NavBarController());
 
   @override
   void initState() {
@@ -186,10 +190,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
                         //         PermissionRequestResponseAction.GRANT,
                         //   );
                         // },
+
                         onScrollChanged: (controller, x, y) {
-                          // setState(() {
-                          //   // scrollY = y;
-                          // });
+                          // print('Scrollhome $scrollY');
+                          navBarController.updateScrollY(y);
+                          // print('Scrollhome1 ${navBarController.scrollY.value}');
                         },
                         onWebViewCreated: (InAppWebViewController controller) {
                           webViewController = controller;
