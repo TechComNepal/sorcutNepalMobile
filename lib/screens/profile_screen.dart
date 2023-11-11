@@ -57,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // fit: StackFit.expand,
           children: [
             Container(
-              height: MediaQuery.of(context).size.height * 10,
+              height: MediaQuery.of(context).size.height,
               child: Stack(
                 children: <Widget>[
                   if (!showErrorPage)

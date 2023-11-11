@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:sortcutnepal/controllers/navbarController.dart';
 import 'package:sortcutnepal/screens/add_post_screen.dart';
 import 'package:sortcutnepal/screens/category_screen.dart';
 import 'package:sortcutnepal/screens/home_screen.dart';
@@ -22,6 +24,8 @@ class MainBottomNavScreen extends StatefulWidget {
 
 class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
   int currentTab = 0;
+  NavBarController navBarController = Get.put(NavBarController());
+
   var _scrollController = ScrollController();
 
   ConnectivityResult _connectionStatus = ConnectivityResult.none;
@@ -136,19 +140,20 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
 
                     return true;
                   },
-                  child: ListView(
-                    physics: const ClampingScrollPhysics(),
-                    controller: _scrollController,
-                    children: [
-                      ConstrainedBox(
-                          constraints: BoxConstraints(
-                              maxHeight:
-                                  // _scrollController.position.maxScrollExtent
-                                  MediaQuery.of(context).size.height * 10),
-                          child: screens[currentTab]),
-                    ],
-                  ),
-                )),
+                  child: screens[currentTab]
+                  // ListView(
+                  //   physics: const ClampingScrollPhysics(),
+                  //   controller: _scrollController,
+                  //   children: [
+                  //     ConstrainedBox(
+                  //         constraints: BoxConstraints(
+                  //             maxHeight:
+                  //                 // _scrollController.position.maxScrollExtent
+                  //                 MediaQuery.of(context).size.height * 8),
+                  //         child: screens[currentTab]),
+                  //   ],
+                  // ),
+                  )),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Visibility(
         visible: visibility,
@@ -166,192 +171,226 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: Visibility(
-        visible: visibility,
-        child: Theme(
-          data: Theme.of(context).copyWith(canvasColor: Colors.transparent),
-          child: BottomAppBar(
-            color: AppColors.mainColor,
-            shape: const CircularNotchedRectangle(),
-            notchMargin: 5,
-            clipBehavior: Clip.antiAlias,
-            // shadowColor: Colors.transparent,
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: getDeviceType() == 'tablet'
-                  ? MainAxisAlignment.spaceEvenly
-                  : MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Material(
-                  color: AppColors.mainColor,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          currentTab = 0;
-                        });
-                      },
-                      child: currentTab == 0
-                          ? const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.home,
-                                  color: AppColors.whiteColor,
-                                ),
-                                Text(
-                                  "Home",
-                                  style: TextStyle(color: AppColors.whiteColor),
-                                ),
-                                //const Padding(padding: EdgeInsets.all(10))
-                              ],
-                            )
-                          : const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.home,
-                                  color: AppColors.blackColor,
-                                ),
-                                Text(
-                                  "Home",
-                                  style: TextStyle(color: AppColors.blackColor),
-                                ),
-                                //const Padding(padding: EdgeInsets.all(10))
-                              ],
+      bottomNavigationBar: GetBuilder<NavBarController>(builder: (controller) {
+        // if (controller.scrollY.value > 0) {
+
+        // }
+
+        // if (controller.scrollY.value == 0) {
+        //   visibility = true;
+        // } else {
+        //   visibility = false;
+        // }
+        return Obx(() => controller.scrollY.value >= 0
+            ? Visibility(
+                visible: visibility =
+                    controller.scrollY.value <= 10 ? false : true,
+                child: Theme(
+                  data: Theme.of(context)
+                      .copyWith(canvasColor: Colors.transparent),
+                  child: BottomAppBar(
+                    color: AppColors.mainColor,
+                    shape: const CircularNotchedRectangle(),
+                    notchMargin: 5,
+                    clipBehavior: Clip.antiAlias,
+                    // shadowColor: Colors.transparent,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: getDeviceType() == 'tablet'
+                          ? MainAxisAlignment.spaceEvenly
+                          : MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Material(
+                          color: AppColors.mainColor,
+                          child: Center(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  currentTab = 0;
+                                });
+                              },
+                              child: currentTab == 0
+                                  ? const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.home,
+                                          color: AppColors.whiteColor,
+                                        ),
+                                        Text(
+                                          "Home",
+                                          style: TextStyle(
+                                              color: AppColors.whiteColor),
+                                        ),
+                                        //const Padding(padding: EdgeInsets.all(10))
+                                      ],
+                                    )
+                                  : const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.home,
+                                          color: AppColors.blackColor,
+                                        ),
+                                        Text(
+                                          "Home",
+                                          style: TextStyle(
+                                              color: AppColors.blackColor),
+                                        ),
+                                        //const Padding(padding: EdgeInsets.all(10))
+                                      ],
+                                    ),
                             ),
+                          ),
+                        ),
+                        Material(
+                          color: AppColors.mainColor,
+                          child: Center(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  currentTab = 1;
+                                });
+                              },
+                              child: currentTab == 1
+                                  ? const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.group,
+                                          color: AppColors.whiteColor,
+                                        ),
+                                        Text(
+                                          "Category",
+                                          style: TextStyle(
+                                              color: AppColors.whiteColor),
+                                        ),
+                                        //const Padding(padding: EdgeInsets.all(10))
+                                      ],
+                                    )
+                                  : const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.group,
+                                          color: AppColors.blackColor,
+                                        ),
+                                        Text(
+                                          "Category",
+                                          style: TextStyle(
+                                              color: AppColors.blackColor),
+                                        ),
+                                        //const Padding(padding: EdgeInsets.all(10))
+                                      ],
+                                    ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(), //to make space for the floating button
+                        Material(
+                          color: AppColors.mainColor,
+                          child: Center(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  currentTab = 2;
+                                });
+                              },
+                              child: currentTab == 2
+                                  ? const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.favorite,
+                                          color: AppColors.whiteColor,
+                                        ),
+                                        Text(
+                                          "Wishlist",
+                                          style: TextStyle(
+                                              color: AppColors.whiteColor),
+                                        ),
+                                        //const Padding(padding: EdgeInsets.all(10))
+                                      ],
+                                    )
+                                  : const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.favorite,
+                                          color: AppColors.blackColor,
+                                        ),
+                                        Text(
+                                          "Wishlist",
+                                          style: TextStyle(
+                                              color: AppColors.blackColor),
+                                        ),
+                                        //const Padding(padding: EdgeInsets.all(10))
+                                      ],
+                                    ),
+                            ),
+                          ),
+                        ),
+                        Material(
+                          color: AppColors.mainColor,
+                          child: Center(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  currentTab = 3;
+                                });
+                              },
+                              child: currentTab == 3
+                                  ? const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.person,
+                                          color: AppColors.whiteColor,
+                                        ),
+                                        Text(
+                                          "Profile",
+                                          style: TextStyle(
+                                              color: AppColors.whiteColor),
+                                        ),
+                                        //const Padding(padding: EdgeInsets.all(10))
+                                      ],
+                                    )
+                                  : const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.person,
+                                          color: AppColors.blackColor,
+                                        ),
+                                        Text(
+                                          "Profile",
+                                          style: TextStyle(
+                                              color: AppColors.blackColor),
+                                        ),
+                                        //const Padding(padding: EdgeInsets.all(10))
+                                      ],
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                Material(
-                  color: AppColors.mainColor,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          currentTab = 1;
-                        });
-                      },
-                      child: currentTab == 1
-                          ? const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.group,
-                                  color: AppColors.whiteColor,
-                                ),
-                                Text(
-                                  "Category",
-                                  style: TextStyle(color: AppColors.whiteColor),
-                                ),
-                                //const Padding(padding: EdgeInsets.all(10))
-                              ],
-                            )
-                          : const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.group,
-                                  color: AppColors.blackColor,
-                                ),
-                                Text(
-                                  "Category",
-                                  style: TextStyle(color: AppColors.blackColor),
-                                ),
-                                //const Padding(padding: EdgeInsets.all(10))
-                              ],
-                            ),
-                    ),
-                  ),
-                ),
-                const SizedBox(), //to make space for the floating button
-                Material(
-                  color: AppColors.mainColor,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          currentTab = 2;
-                        });
-                      },
-                      child: currentTab == 2
-                          ? const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.favorite,
-                                  color: AppColors.whiteColor,
-                                ),
-                                Text(
-                                  "Wishlist",
-                                  style: TextStyle(color: AppColors.whiteColor),
-                                ),
-                                //const Padding(padding: EdgeInsets.all(10))
-                              ],
-                            )
-                          : const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.favorite,
-                                  color: AppColors.blackColor,
-                                ),
-                                Text(
-                                  "Wishlist",
-                                  style: TextStyle(color: AppColors.blackColor),
-                                ),
-                                //const Padding(padding: EdgeInsets.all(10))
-                              ],
-                            ),
-                    ),
-                  ),
-                ),
-                Material(
-                  color: AppColors.mainColor,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          currentTab = 3;
-                        });
-                      },
-                      child: currentTab == 3
-                          ? const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.person,
-                                  color: AppColors.whiteColor,
-                                ),
-                                Text(
-                                  "Profile",
-                                  style: TextStyle(color: AppColors.whiteColor),
-                                ),
-                                //const Padding(padding: EdgeInsets.all(10))
-                              ],
-                            )
-                          : const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.person,
-                                  color: AppColors.blackColor,
-                                ),
-                                Text(
-                                  "Profile",
-                                  style: TextStyle(color: AppColors.blackColor),
-                                ),
-                                //const Padding(padding: EdgeInsets.all(10))
-                              ],
-                            ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+              )
+            : Container());
+        // return
+        // }
+        // return Container();
+      }),
     );
   }
 }

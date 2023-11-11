@@ -5,6 +5,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:get/get.dart';
+import 'package:sortcutnepal/controllers/navbarController.dart';
 import 'package:sortcutnepal/screens/message/loading_screen.dart';
 import 'dart:developer' as developer;
 
@@ -28,7 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late PullToRefreshController pullToRefreshController;
 
   final ChromeSafariBrowser browser = new AndroidTWABrowser();
-
+  NavBarController navBarController = Get.put(NavBarController());
+  int scrollY = 0;
   @override
   void initState() {
     super.initState();
@@ -58,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // if (!isLoading)
             Container(
-              height: MediaQuery.of(context).size.height * 10,
+              // height: MediaQuery.of(context).size.height * 10,
               child: Stack(
                 children: <Widget>[
                   if (!showErrorPage)
@@ -146,6 +149,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       onLoadError: (webViewController, url, i, s) async {
                         showError();
+                      },
+                      onScrollChanged: (controller, x, y) {
+                        setState(() {
+                          scrollY = y;
+                        });
+                        print('Scrollhome $scrollY');
+                        navBarController.scrollY.value = y;
+                        navBarController.update();
+                        print('Scrollhome1 ${navBarController.scrollY.value}');
                       },
                       onLoadHttpError:
                           (webViewController, url, int i, String s) async {
