@@ -53,7 +53,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     return WillPopScope(
       onWillPop: () => Alerts().exitApp(context, webViewController!),
       child: SafeArea(
-        child: Column(
+        child: Stack(
           // fit: StackFit.expand,
           children: [
             // isLoading
@@ -62,10 +62,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
             //         color: Color(0xff486CCE),
             //       ))
             //     : const SizedBox(),
-            if (isLoading)
-              Container(
-                  height: MediaQuery.of(context).size.height,
-                  child: const LoadingScreen()),
+
             Container(
               height: MediaQuery.of(context).size.height * 10,
               child: NotificationListener<ScrollNotification>(
@@ -210,6 +207,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 ),
               ),
             ),
+            if (isLoading)
+              Container(
+                  height: MediaQuery.of(context).size.height,
+                  child: const LoadingScreen()),
           ],
         ),
       ),

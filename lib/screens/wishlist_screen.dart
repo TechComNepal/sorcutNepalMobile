@@ -53,13 +53,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
     return WillPopScope(
       onWillPop: () => Alerts().exitApp(context, webViewController!),
       child: SafeArea(
-        child: Column(
+        child: Stack(
           // fit: StackFit.expand,
           children: [
-            if (isLoading)
-              Container(
-                  height: MediaQuery.of(context).size.height,
-                  child: const LoadingScreen()),
             Container(
               height: MediaQuery.of(context).size.height * 10,
               child: Stack(
@@ -177,6 +173,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 ],
               ),
             ),
+            if (isLoading)
+              Container(
+                  height: MediaQuery.of(context).size.height,
+                  child: const LoadingScreen()),
           ],
         ),
       ),

@@ -86,6 +86,15 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
     super.dispose();
   }
 
+  // This is what you're looking for!
+  void _scrollDown() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: Duration(seconds: 2),
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,6 +143,7 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                       ConstrainedBox(
                           constraints: BoxConstraints(
                               maxHeight:
+                                  // _scrollController.position.maxScrollExtent
                                   MediaQuery.of(context).size.height * 10),
                           child: screens[currentTab]),
                     ],

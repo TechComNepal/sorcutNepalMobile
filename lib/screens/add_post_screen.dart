@@ -53,13 +53,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
     return WillPopScope(
       onWillPop: () => Alerts().exitApp(context, webViewController!),
       child: SafeArea(
-        child: Column(
+        child: Stack(
           // fit: StackFit.expand,
           children: [
-            if (isLoading)
-              Container(
-                  height: MediaQuery.of(context).size.height,
-                  child: const LoadingScreen()),
             Container(
               height: MediaQuery.of(context).size.height * 10,
               child: Stack(
@@ -159,6 +155,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 ],
               ),
             ),
+            if (isLoading)
+              Container(
+                  height: MediaQuery.of(context).size.height,
+                  child: const LoadingScreen()),
           ],
         ),
       ),

@@ -53,13 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return WillPopScope(
       onWillPop: () => Alerts().exitApp(context, webViewController!),
       child: SafeArea(
-        child: Column(
+        child: Stack(
           // fit: StackFit.expand,
           children: [
-            if (isLoading)
-              Container(
-                  height: MediaQuery.of(context).size.height,
-                  child: const LoadingScreen()),
             // if (!isLoading)
             Container(
               height: MediaQuery.of(context).size.height * 10,
@@ -160,6 +156,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+            if (isLoading)
+              Container(
+                  height: MediaQuery.of(context).size.height,
+                  child: const LoadingScreen()),
           ],
         ),
       ),
